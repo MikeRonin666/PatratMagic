@@ -1,0 +1,2 @@
+# PatratMagic
+Generare Patrate Magice
