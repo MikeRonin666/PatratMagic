@@ -1,220 +1,216 @@
 #include <iostream>
+#include <iomanip>
+#include <windows.h>
 using namespace std;
 
-int a[10][10];
-void Citire(int &n , int v[10][10])
-{
-    //cout<<"n: "; cin>>n;
-    for(int i=0; i<n; i++)
-        for(int j=0; j<n; j++)
-            cin>>v[i][j];
-}
-void Afisare(int n , int v[10][10])
-{
-    for(int i=0; i<n; i++)
-        {for(int j=0; j<n; j++)
-            cout<<v[i][j]<<' ';
-        cout<<endl;
-        }
-}
+int n;
+int a[101][101],grade=0;
 
-void Impar(int n)
+void impar(int n)
 {
-    int a[n][n];
-
-    for(int x = 0; x < n; x++) 
-        for(int y = 0; y < n; y++) 
-            a[x][y] = 0;
-
-    int i=n/2,
-    j=n-1;
-    a[i][j]=1;
-    
-    for(int k=2; k<=n*n; k++)
+    int i = 1, j = (n + 1) / 2;
+    for (int num = 1; num <= n * n; num++)
     {
-        i=i-1;
-        j=j+1;
-
-        if(i<0) i=n-1;
-        if(j>=n) j=0;
-
-        if(a[i][j]!=0)
+        a[i][j] = num;
+        int ni = i - 1;
+        int nj = j + 1;
+        if (ni == 0) ni = n;
+        if (nj == n + 1) nj = 1;
+        if (a[ni][nj])
         {
-            i=i+1;
-            j=j-2;
-            if(i >= n) i = 0;
-            if(j < 0) j = j+n; //?
+            i++;
         }
-        if(i < 0 && j == n) 
+        else
         {
-            i=0;
-            j=n-2;
+            i = ni;
+            j = nj;
         }
-
-        a[i][j]=k;
-
     }
-
-   for(int i=0; i<n; i++)
-    {
-        for(int j=0; j<n; j++)
-            cout<<a[i][j]<<' ';
-        cout<<endl;
-    }
-
-}
-void ParPar(int n)
-{
-    int k=0;
-    for(int i=1;i<=n;++i)
-        for(int j=1;j<=n;++j)
-            a[i][j]=++k;
-    for(int i=1;i<=n/4;++i)
-        for(int j=n/4+1;j<=n-n/4;++j)
-            swap(a[i][j],a[n-i+1][n-j+1]);
-    for(int i=1;i<=n/4;++i)
-        for(int j=n/4+1;j<=n-n/4;++j)
-            swap(a[j][i],a[n-j+1][n-i+1]);
-    for(int i=1;i<=n;++i)
-    {
-        for(int j=1;j<=n;++j)
-            cout<<a[i][j]<<' ';
-        cout<<'\n';
-    } 
 }
 
-void PareImpare(int n)
+void parPar(int n)
 {
-    // 1. Setup: n is singly even (e.g., 6, 10), so m is odd (e.g., 3, 5).
-    int m = n / 2;
-    int k = (n - 2) / 4; 
-    
-    int a[n][n];
+    int num = 1;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            a[i][j] = num++;
 
-    // Initialize only the first quadrant A to 0 for collision detection
-    for(int i = 0; i < m; i++)
-        for(int j = 0; j < m; j++)
-            a[i][j] = 0;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            if ((i % 4 == 1 || i % 4 == 0) && (j % 4 == 1 || j % 4 == 0))
+                a[i][j] = n*n + 1 - a[i][j];
+            else if ((i % 4 == 2 || i % 4 == 3) && (j % 4 == 2 || j % 4 == 3))
+                a[i][j] = n*n + 1 - a[i][j];
+}
 
-    // 2. Fill the Quadrants
-    // Pattern: A | C
-    //          --+--
-    //          D | B
-    // A uses numbers 1..m^2
-    // B uses m^2+1..2m^2 (Bottom-Right)
-    // C uses 2m^2+1..3m^2 (Top-Right)
-    // D uses 3m^2+1..4m^2 (Bottom-Left)
+void parImpar(int n)
+{
+    int k = n / 2;
+    int size = k * k;
+    int b[101][101] = {0};
 
-    // Using standard Siamese (Top-Middle start) for the sub-grids
-    int row = 0;
-    int col = m / 2;
-
-    for(int x = 1; x <= m*m; x++)
+    // 1. Generăm pătratul magic impar de bază (k x k) în b
+    int i = 1, j = (k + 1) / 2;
+    for (int num = 1; num <= size; num++)
     {
-        // Fill A (Top-Left)
-        a[row][col] = x;
-        // Fill B (Bottom-Right) -> value + m*m
-        a[row + m][col + m] = x + m * m;
-        // Fill C (Top-Right) -> value + 2*m*m
-        a[row][col + m] = x + 2 * m * m;
-        // Fill D (Bottom-Left) -> value + 3*m*m
-        a[row + m][col] = x + 3 * m * m;
-
-        // Move Logic (Siamese)
-        int next_row = row - 1;
-        int next_col = col + 1;
-
-        if(next_row < 0) next_row = m - 1;
-        if(next_col >= m) next_col = 0;
-
-        if(a[next_row][next_col] != 0)
+        b[i][j] = num;
+        int ni = i - 1, nj = j + 1;
+        if (ni == 0) ni = k;
+        if (nj == k + 1) nj = 1;
+        if (b[ni][nj]) i++;
+        else
         {
-            next_row = row + 1;
-            next_col = col;
-        }
-
-        row = next_row;
-        col = next_col;
-    }
-
-    // 3. Swapping Rules (Strachey Method)
-
-    // Left Side Swap (Swap columns 0 to k-1 between A and D)
-    for(int i = 0; i < m; i++)
-    {
-        for(int j = 0; j < k; j++)
-        {
-            // Standard: swap column j
-            int swap_col = j;
-            
-            // Exception: In the middle row of the quadrant, shift swap 1 step right
-            if(i == m / 2) 
-                swap_col = j + 1;
-
-            swap(a[i][swap_col], a[i + m][swap_col]);
+            i = ni;
+            j = nj;
         }
     }
 
-    // Right Side Swap (Swap last k-1 columns between C and B)
-    // This only runs if n > 6
-    for(int i = 0; i < m; i++)
+    // 2. Umplem cele 4 cadrane ale matricei 'a'
+    for (int r = 1; r <= k; r++)
     {
-        for(int j = 0; j < k - 1; j++)
+        for (int c = 1; c <= k; c++)
         {
-            int swap_col = n - 1 - j;
-            swap(a[i][swap_col], a[i + m][swap_col]);
+            a[r][c] = b[r][c];                 // Cadranul A (stânga-sus)
+            a[r + k][c + k] = b[r][c] + size;     // Cadranul B (dreapta-jos)
+            a[r][c + k] = b[r][c] + 2 * size;     // Cadranul C (dreapta-sus)
+            a[r + k][c] = b[r][c] + 3 * size;     // Cadranul D (stânga-jos)
         }
     }
 
-    // 4. Print
-    for(int i = 0; i < n; i++)
+    int m = (n - 2) / 4; // Numărul de coloane ce trebuie schimbate
+    int mid = k / 2 + 1; // Rândul din mijloc al cadranelor de sus
+
+    // 3. Schimbăm elementele între cadranele din stânga (A și D)
+    for (int r = 1; r <= k; r++)
     {
-        for(int j = 0; j < n; j++)
-            cout << a[i][j] << ' ';
-        cout << endl;
+        for (int c = 1; c <= m; c++)
+        {
+            if (r == mid)
+            {
+                // Excepția Strachey: pe rândul din mijloc,
+                // mutăm zona de swap cu o coloană la dreapta
+                swap(a[r][c + m], a[r + k][c + m]);
+            }
+            else
+            {
+                // Pentru restul rândurilor, schimbăm primele m coloane
+                swap(a[r][c], a[r + k][c]);
+            }
+        }
+    }
+
+    // 4. Schimbăm elementele între cadranele din dreapta (C și B)
+    // Această parte este necesară doar pentru n > 6
+    for (int r = 1; r <= k; r++)
+    {
+        for (int c = n - m + 2; c <= n; c++)
+        {
+            swap(a[r][c], a[r + k][c]);
+        }
     }
 }
-bool Verificare(int n, int a[10][10])
-{
-    int sumad1=0, sumad2=0;
-    for(int i=0; i<n; i++) ///suma diagonala princiapala si secundara
-    {
-        sumad1+=a[i][i];
-        sumad2+=a[i][n-i-1];
-    }
-    if(sumad1 != sumad2) return false;
 
-    for(int i=0; i<n; i++)
+void oglindire(int n)
+{
+    for (int i = 1; i <= n; i++)
     {
-        int sumaR=0, sumaC=0;
-        for(int j=0; j<n; j++)
+        for (int j = 1; j <= n / 2; j++)
         {
-            sumaR+= a[i][j]; ///suma randuri
-            sumaC+=a[j][i]; ///suma coloane
+            int aux = a[i][j];
+            a[i][j] = a[i][n - j + 1];
+            a[i][n - j + 1] = aux;
         }
-        if(sumaR != sumaC || sumaR != sumad1) return false;
     }
-    return true;
-    
+}
+
+void transpunere(int n)
+{
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = i + 1; j <= n; j++)
+        {
+            int aux = a[i][j];
+            a[i][j] = a[j][i];
+            a[j][i] = aux;
+        }
+    }
+}
+
+void afisare()
+{
+    cout<<"+";
+    for(int i=0; i<n*6; i++)
+        cout<<"-";
+    cout<<"\b+";
+    cout<<endl;
+    for (int i = 1; i <= n; i++)
+    {
+        cout<<"\b|";
+        for (int j = 1; j <= n; j++)
+        {
+            cout<<setw(3)<<a[i][j]<<setw(3)<< "|";
+            Sleep(50);
+        }
+        cout<<setw(3)<<"\b\b |";
+        cout << "\n";
+    }
+    cout<<"+";
+    for(int i=0; i<n*6; i++)
+        cout<<"-";
+    cout<<"\b+";
+}
+
+void tiparesteLent(string text, int timp)
+{
+    for(char c:text)
+    {
+        cout<<c<<flush;
+        Sleep(timp);
+    }
+    cout<<endl;
 }
 
 int main()
 {
-    int n;
-    cout<<"n: "; cin>>n;
- /* Citire(n,v);
-    cout<<endl; */
-    //Afisare(n,v);
-    cout<<endl;
-    
-    if(n%2)
-        Impar(n);
-    if(n%4==0)
-        ParPar(n);
-    else PareImpare(n);
+    int input;
 
- /*    if(Verificare(n,v)) cout<<"Patratul este magic!";
-    else cout<<"Patratul nu este magic!";*/
+    tiparesteLent("========================================", 10);
+    tiparesteLent("   GENERATOR DE PATRATE MAGICE    ", 20);
+    tiparesteLent("========================================", 10);
+    cout<<"\n\n\n";
+
+    tiparesteLent("APASATI 1 SA INCEPETI",20);
+    cin>>input;
+
+
+    switch(input)
+    {
+    case 1:
+        system("cls");
+    tiparesteLent("Introduceti dimensiunea n: ",20);
+    cin >> n;
+    if (n % 2 == 1) impar(n);
+    else if (n % 4 == 0) parPar(n);
+    else parImpar(n);
+
+    for(int i=0; i<4; i++)
+    {
+        cout<<"Varianta "<<(i*2)+1<<" ("<<grade<<" grade)"<<endl<<endl;
+        afisare();
+        cout<<endl;
+        oglindire(n);
+        cout<<"Varianta "<<(i*2)+2<< " (Reflexie):"<<endl<<endl;
+        afisare();
+        oglindire(n);
+        transpunere(n);
+        oglindire(n);
+        grade+=90;
+
+        cout<<endl;
+    }
+    tiparesteLent("GENERAT CU SUCCES!",30);
+    break;
+    }
 
 
 }
